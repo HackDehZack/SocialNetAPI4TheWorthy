@@ -1,6 +1,6 @@
 // Importing the required modules
 const express = require('express');
-const connectDB = require('./config/connection');
+const connectDB = require('./config/db.js');
 const routes = require('./routes');
 
 const app = express();
