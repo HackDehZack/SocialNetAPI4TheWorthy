@@ -1,6 +1,6 @@
 // Importing required modules
 const mongoose = require('mongoose');
-const Reaction = require('./Reaction');
+const reactionSchema = require('./Reaction'); // Ensure that this exports a schema, not a model
 
 // Defining the thought schema
 const thoughtSchema = new mongoose.Schema({
@@ -23,15 +23,21 @@ const thoughtSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    reactions: [Reaction.schema]
-}, { toJSON: { virtuals: true }, id: false });
+    reactions: [reactionSchema] // Using the reactionSchema directly
+}, {
+    toJSON: {
+        getters: true,
+        virtuals: true
+    },
+    id: false
+});
 
 // Defining a virtual property to get the reaction count
 thoughtSchema.virtual('reactionCount').get(function() {
   return this.reactions.length;
 });
 
-// Creating the Thought model
+// Creating the Thought model using the thought schema
 const Thought = mongoose.model('Thought', thoughtSchema);
 
 // Exporting the Thought model
