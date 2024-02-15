@@ -1,23 +1,21 @@
-// Import required modules
+// Importing the required modules
 const express = require('express');
-const connectDB = require('./config/db'); // Import the database connection configuration
+const connectDB = require('./config/connection');
 const routes = require('./routes');
 
-// Create an Express application
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON and URL-encoded data
+// Parsing JSON data in the request body
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB database
+// Connecting to the database
 connectDB();
 
-// Use routes defined in the routes module
-app.use(routes);
+// Setting up the API routes
+app.use('/api', routes);
 
-// Start the server
+// Starting the server
 app.listen(PORT, () => {
-  console.log(`Server is running on localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

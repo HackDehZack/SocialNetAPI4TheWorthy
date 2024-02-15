@@ -1,70 +1,38 @@
 // Importing required modules
-const { Schema, model, Types } = require('mongoose');
+const mongoose = require('mongoose');
+const Reaction = require('./Reaction');
 
-// Reaction schema for individual reactions on thoughts
-const ReactionSchema = new Schema(
-    {
-        reactionId: {
-            type: Schema.Types.ObjectId, 
-            default: () => new Types.ObjectId(),
-        },
-        reactionBody: {
-            type: String,
-            required: true, 
-            maxlength: 280,
-        },
-        username: {
-            type: String,
-            required: true, 
-        },
-        createdAt: {
-            type: Date, 
-            default: Date.now, 
-        },
+// Defining the thought schema
+const thoughtSchema = new mongoose.Schema({
+    thoughtText: {
+        type: String,
+        required: true,
+        minlength: 1,
+        maxlength: 280
     },
-    {
-        toJSON: {
-            getters: true,
-        },
-        id: false, 
-    }
-);
-
-// Thought schema for storing thoughts and their reactions
-const ThoughtSchema = new Schema(
-    {
-        thoughtText: {
-            type: String,
-            required: [true, "Thought is Required Please!"],
-            minlength: 1,
-            maxlength: 280,
-        },
-        createdAt: {
-            type: Date, 
-            default: Date.now,
-        },
-        username: {
-            type: String,
-            required: true, 
-        },
-        reactions: [ReactionSchema],
+    username: {
+        type: String,
+        required: true
     },
-    {
-        toJSON: {
-            virtuals: true,
-            getters: true,
-        },
-        id: false,
-    }
-);
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        get: createdAtVal => dateFormat(createdAtVal) // Use a getter method to format the timestamp on query
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    },
+    reactions: [Reaction.schema]
+}, { toJSON: { virtuals: true }, id: false });
 
-// Virtual property to get the count of reactions on a thought
-ThoughtSchema.virtual("reactionCount").get(function () {
-    return this.reactions.length;
+// Defining a virtual property to get the reaction count
+thoughtSchema.virtual('reactionCount').get(function() {
+  return this.reactions.length;
 });
 
-// Creating the Thought model using the ThoughtSchema
-const Thought = model("Thought", ThoughtSchema);
+// Creating the Thought model
+const Thought = mongoose.model('Thought', thoughtSchema);
 
 // Exporting the Thought model
 module.exports = Thought;
