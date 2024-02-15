@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Thought = require('../models/Thought');
 const Reaction = require('../models/Reaction');
+
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017', {
   useNewUrlParser: true,

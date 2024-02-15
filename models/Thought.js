@@ -1,44 +1,73 @@
 // Importing required modules
-const mongoose = require('mongoose');
-const reactionSchema = require('./Reaction'); // Ensure that this exports a schema, not a model
+const { Schema, model, Types } = require('mongoose');
+const dateFormat = require("../utils/dateFormat.js");
 
-// Defining the thought schema
-const thoughtSchema = new mongoose.Schema({
-    thoughtText: {
-        type: String,
-        required: true,
-        minlength: 1,
-        maxlength: 280
+// Reaction schema for storing reactions on thoughts
+const ReactionSchema = new Schema(
+    {
+        reactionId: {
+            type: Schema.Types.ObjectId, 
+            default: () => new Types.ObjectId(),
+        },
+        reactionBody: {
+            type: String,
+            required: true, // Reaction body is required
+            maxlength: 280, // Maximum length of reaction body is 280 characters
+        },
+        username: {
+            type: String,
+            required: true, // Username is required
+        },
+        createdAt: {
+            type: Date, 
+            default: Date.now, // Default value is the current date and time
+            get: (timestamp) => dateFormat(timestamp), // Custom getter function to format the date
+        },
     },
-    username: {
-        type: String,
-        required: true
+    {
+        toJSON: {
+            getters: true, // Include getters when converting to JSON
+        },
+        id: false, // Exclude the 'id' field from the document
+    }
+);
+
+// Thought schema for storing thoughts and their reactions
+const ThoughtSchema = new Schema(
+    {
+        thoughtText: {
+            type: String,
+            required: "Thought is Required", // Thought text is required
+            minlength: 1, // Minimum length of thought text is 1 character
+            maxlength: 280, // Maximum length of thought text is 280 characters
+        },
+        createdAt: {
+            type: Date, 
+            default: Date.now, // Default value is the current date and time
+            get: (timestamp) => dateFormat(timestamp), // Custom getter function to format the date
+        },
+        username: {
+            type: String,
+            required: true, // Username is required
+        },
+        reactions: [ReactionSchema], // Array of reactions associated with the thought
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-        get: createdAtVal => dateFormat(createdAtVal) // Use a getter method to format the timestamp on query
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
-    reactions: [reactionSchema] // Using the reactionSchema directly
-}, {
-    toJSON: {
-        getters: true,
-        virtuals: true
-    },
-    id: false
+    {
+        toJSON: {
+            virtuals: true, // Include virtual properties when converting to JSON
+            getters: true, // Include getters when converting to JSON
+        },
+        id: false, // Exclude the 'id' field from the document
+    }
+);
+
+// Virtual property to get the count of reactions on a thought
+ThoughtSchema.virtual("reactionCount").get(function () {
+    return this.reactions.length;
 });
 
-// Defining a virtual property to get the reaction count
-thoughtSchema.virtual('reactionCount').get(function() {
-  return this.reactions.length;
-});
+// Create the Thought model using the ThoughtSchema
+const Thought = model("Thought", ThoughtSchema);
 
-// Creating the Thought model using the thought schema
-const Thought = mongoose.model('Thought', thoughtSchema);
-
-// Exporting the Thought model
+// Export the Thought model
 module.exports = Thought;
